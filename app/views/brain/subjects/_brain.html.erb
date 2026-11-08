@@ -1,0 +1,15 @@
+<%# locals: (subject:) %>
+<%# A client's or a piece of work's brain: what everyone should know about it, a card per section,
+    each written in place and confirmed when it still holds. Its first heading is hidden: the tab
+    names it. %>
+<% sections = Brain::Section.for(subject) %>
+<section class="brain">
+  <h2 class="brain__heading">Brain</h2>
+  <p class="brain__intro muted">
+    What everyone should know about <%= Brain::Subject.name(subject) %>, so it isn’t only in one person’s head. Keep each part short and true;
+    it goes into every <%= term(:task).downcase %>’s brief for AI. Notes that matter long-term can be added from their menu.
+  </p>
+  <div class="brain__sections">
+    <%= render partial: "brain/sections/section", collection: sections, as: :section, locals: { subject: subject } %>
+  </div>
+</section>

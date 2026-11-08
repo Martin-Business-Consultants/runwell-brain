@@ -1,0 +1,14 @@
+/* The brain (brain/subjects/brain): an intro line, then a card per section, two to a row where
+/* there's room. Drawn on Runwell's design tokens (docs/theming.md). */
+.brain { display: flex; flex-direction: column; gap: var(--s-4); }
+.brain__heading { display: none; }
+.brain__intro { margin: 0; max-width: 60ch; }
+.brain__sections { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: var(--s-4); align-items: start; }
+.brain-section__body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s-3); }
+.brain-section__text { overflow-wrap: anywhere; }
+.brain-section__edit { width: 100%; }
+.brain-section__edit[open] summary { display: none; }
+.brain-section__form { display: flex; flex-direction: column; gap: var(--s-2); }
+.brain-section__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.brain-promote { display: inline-block; }
+.brain-promote__form { display: flex; align-items: center; gap: var(--s-2); padding-top: var(--s-2); }

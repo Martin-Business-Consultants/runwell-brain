@@ -1,0 +1,45 @@
+<%# locals: (section:, subject:) %>
+<%# One section of a brain: what it holds, who last confirmed it (stale after six months), and
+    Edit (a <details> form; saving confirms it) and Confirm (still true as it stands). %>
+<% kind = Brain::Subject.kind(subject) %>
+<% param = Brain::Subject.param(subject) %>
+<section class="card brain-section" id="brain_<%= section.key %>">
+  <header class="card__head">
+    <h3 class="card__title"><%= section.label %></h3>
+    <p class="card__hint"><%= section.hint %></p>
+    <% if section.stale? %>
+      <div class="card__action"><%= badge "Not confirmed lately", tone: :attention %></div>
+    <% end %>
+  </header>
+  <div class="card__content brain-section__body">
+    <% if section.written? %>
+      <div class="brain-section__text"><%= rich_text section.body %></div>
+    <% else %>
+      <p class="muted">Nothing yet.</p>
+    <% end %>
+    <details class="brain-section__edit">
+      <summary class="btn btn--secondary btn--sm"><%= icon_tag "pencil" %> <%= section.written? ? "Edit" : "Write it" %></summary>
+      <%= form_with model: section, url: brain_section_path(subject: kind, id: param, key: section.key), method: :patch, scope: :section,
+            namespace: "brain_#{kind}_#{param}_#{section.key}", class: "brain-section__form" do |form| %>
+        <%= rich_text_field form, :body %>
+        <div class="button-row">
+          <button type="submit" class="btn btn--primary btn--sm">Save</button>
+        </div>
+      <% end %>
+    </details>
+  </div>
+  <% if section.written? %>
+    <footer class="card__footer brain-section__footer">
+      <span class="muted small">
+        <% if section.confirmed_at %>
+          Confirmed <%= time_ago_in_words(section.confirmed_at) %> ago<% if section.confirmed_by %> by <%= section.confirmed_by.display_name %><% end %>
+        <% else %>
+          Never confirmed
+        <% end %>
+      </span>
+      <%= button_to brain_section_confirmation_path(subject: kind, id: param, key: section.key), class: "btn btn--ghost btn--sm", title: "Still true as it stands" do %>
+        <%= icon_tag "check" %> <span>Still true</span>
+      <% end %>
+    </footer>
+  <% end %>
+</section>
