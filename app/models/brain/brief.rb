@@ -11,7 +11,7 @@ module Brain
       written = Section.for(subject).select(&:written?)
       return if written.empty?
 
-      name = subject.is_a?(Work) ? "#{subject.ref} #{subject.title}" : subject.name
+      name = Subject.name(subject)
       [ "## What we know about #{name}", *written.map { |section| "### #{section.label}#{" (not confirmed lately)" if section.stale?}\n\n#{section.plain}" } ].join("\n\n")
     end
   end

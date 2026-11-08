@@ -19,6 +19,6 @@ module Brain
 
     def self.kind(subject) = subject.is_a?(Work) ? "work" : "client"
     def self.param(subject) = subject.is_a?(Work) ? subject.ref : subject.id
-    def self.name(subject) = subject.is_a?(Work) ? "#{subject.ref} #{subject.title}" : subject.name
+    def self.name(subject) = subject.is_a?(Work) ? subject.title : subject.name
   end
 end
