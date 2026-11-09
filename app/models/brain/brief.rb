@@ -12,7 +12,7 @@ module Brain
       return if written.empty?
 
       name = Subject.name(subject)
-      [ "## What we know about #{name}", *written.map { |section| "### #{section.label}#{" (not confirmed lately)" if section.stale?}\n\n#{section.plain}" } ].join("\n\n")
+      [ "## What we know about #{name}", *written.map { |section| "### #{section.label}#{" (#{section.state_label.downcase})" if section.stale?}\n\n#{section.plain}" } ].join("\n\n")
     end
   end
 end

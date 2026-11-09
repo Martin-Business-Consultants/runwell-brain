@@ -4,7 +4,7 @@ module Brain
   class PromotionsController < ApplicationController
     allow_staff
     agent_tool :add_note_to_brain, on: :create, title: "Add a note to a brain",
-      description: "note_id: the note; key: the section it belongs in (about, people, working, unique, history or decisions). It's added at the end of that section of its client's or its work's brain, credited to who wrote it.",
+      description: "note_id: the note; key: the section it belongs in (#{Brain::Section::KEYS.to_sentence(last_word_connector: " or ")}). It's added at the end of that section of its client's or its work's brain, credited to who wrote it.",
       params: { key: Brain::Section::KEYS }
 
     def create

@@ -7,7 +7,7 @@ module Brain
     initializer "brain.routes" do |app|
       app.routes.append do
         scope "brain", module: "brain", as: "brain" do
-          constraints subject: /client|work/ do
+          constraints subject: Regexp.union(Brain::Subject::KINDS) do
             get ":subject/:id", to: "subjects#show", as: :subject
             patch ":subject/:id/:key", to: "sections#update", as: :section
             post ":subject/:id/:key/confirmation", to: "confirmations#create", as: :section_confirmation

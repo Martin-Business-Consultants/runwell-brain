@@ -8,14 +8,14 @@
     <h3 class="card__title"><%= section.label %></h3>
     <p class="card__hint"><%= section.hint %></p>
     <% if section.stale? %>
-      <div class="card__action"><%= badge "Not confirmed lately", tone: :attention %></div>
+      <div class="card__action"><%= badge section.state_label, tone: :attention %></div>
     <% end %>
   </header>
   <div class="card__content brain-section__body">
     <% if section.written? %>
       <div class="brain-section__text"><%= rich_text section.body %></div>
     <% else %>
-      <p class="muted">Nothing yet.</p>
+      <p class="muted"><%= section.state_label %>.</p>
     <% end %>
     <details class="brain-section__edit">
       <summary class="btn btn--secondary btn--sm"><%= icon_tag "pencil" %> <%= section.written? ? "Edit" : "Write it" %></summary>
@@ -28,7 +28,7 @@
       <% end %>
     </details>
   </div>
-  <% if section.written? %>
+  <% if section.confirmable? %>
     <footer class="card__footer brain-section__footer">
       <span class="muted small">
         <% if section.confirmed_at %>

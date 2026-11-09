@@ -1,8 +1,8 @@
 <%# locals: (note:) %>
 <%# Add to brain, in each note (the :note_row slot): a note that matters long-term moves into a
-    section of its client's or its work's brain. Only on notes that have one; reads the note's own
-    columns, so it costs no query per row. %>
-<% if note.subject_type.in?(%w[Client Work Task ScopeItem]) %>
+    section of its client's or its work's brain. Only on notes that have one (Brain::Subject.promotable?:
+    the note's own columns, and a task's work or client, already loaded with its notes). %>
+<% if Brain::Subject.promotable?(note) %>
   <details class="brain-promote">
     <summary class="btn btn--ghost btn--sm"><%= icon_tag "add" %> Add to brain</summary>
     <%= form_with url: brain_note_promotion_path(note_id: note.id), method: :post, namespace: "brain_note_#{note.id}", class: "brain-promote__form" do |form| %>

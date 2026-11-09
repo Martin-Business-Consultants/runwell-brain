@@ -4,8 +4,10 @@ module Brain
   # or a Work) and the people are core records, pointed at by id. A section is made the first
   # time it's written; until then the page shows an empty one.
   #
-  # Kept true by people: writing a section confirms it, and so does Confirm when it still holds.
-  # One nobody has confirmed in STALE_AFTER is stale, and says so.
+  # Kept true by people. A section is empty (nothing written yet, or cleared), current (written and
+  # confirmed within STALE_AFTER) or stale (written, but nobody's confirmed it since): `state`, the
+  # one rule the page, the brief and agents read. Writing it confirms it; Confirm says it still
+  # holds, and only a written section can be confirmed; writing it blank clears it, back to empty.
   class Section < ApplicationRecord
     self.table_name = "brain_sections"
 
@@ -20,6 +22,7 @@ module Brain
     }.freeze
     KEYS = KINDS.keys.freeze
     STALE_AFTER = 6.months
+    STATES = { "empty" => "Nothing yet", "current" => "Confirmed lately", "stale" => "Not confirmed lately" }.freeze
 
     belongs_to :subject, polymorphic: true
     belongs_to :updated_by, class_name: "User", optional: true
@@ -36,17 +39,32 @@ module Brain
     def label = KINDS.fetch(key).first
     def hint = KINDS.fetch(key).last
     def written? = body.present? && plain.present?
-    def stale? = written? && (confirmed_at.nil? || confirmed_at < STALE_AFTER.ago)
+
+    def state
+      return "empty" unless written?
+
+      confirmed_at && confirmed_at >= STALE_AFTER.ago ? "current" : "stale"
+    end
+
+    def state_label = STATES.fetch(state)
+    def stale? = state == "stale"
+    def confirmable? = written?
 
     # Plain text, for briefs and agents.
     def plain = Rails::HTML5::FullSanitizer.new.sanitize(body.to_s.gsub(%r{</(p|div|li|h\d)>|<br\s*/?>}i, "\n")).gsub(/\n{3,}/, "\n\n").strip
 
-    # Writing it is saying it's true now.
+    # Writing it is saying it's true now; writing it blank clears it (empty, confirmed by no one).
     def write!(html, by:)
-      update!(body: html, updated_by: by&.person, confirmed_at: Time.current, confirmed_by: by&.person)
+      self.body = html
+      written? ? update!(updated_by: by&.person, confirmed_at: Time.current, confirmed_by: by&.person) : update!(body: nil, updated_by: by&.person, confirmed_at: nil, confirmed_by: nil)
     end
 
+    # Raises Brain::Section::Refused, in words, when there's nothing written to confirm.
+    class Refused < StandardError; end
+
     def confirm!(by:)
+      raise Refused, "#{label} has nothing written yet, so there’s nothing to confirm. Write it first." unless confirmable?
+
       update!(confirmed_at: Time.current, confirmed_by: by&.person)
     end
 

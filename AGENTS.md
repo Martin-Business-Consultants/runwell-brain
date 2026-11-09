@@ -28,3 +28,17 @@ use nothing else of the core's) and `AGENTS.md` (the conventions plugin code fol
 - Views follow Runwell's ReActionView rules (strict locals, `herb:key` on loops, no inline CSS) and
   draw with rune_ui and the contract's helpers; CSS reads the design tokens.
 - Migrations are safe on a live install.
+
+## State machines
+
+Each one's rules live once, on a model; views, controllers, the brief and the JSON ask it, never
+keep a copy (Runwell's own convention):
+
+- A section: empty (nothing written, or cleared), current (confirmed within `STALE_AFTER`) or stale
+  (`Section#state`, `STATES` for the words; agents see `state` and `confirmable`). Writing confirms
+  it; writing it blank clears it back to empty; only a written section can be confirmed
+  (`confirmable?`; `confirm!` raises `Section::Refused`, and the controller refuses with the reason)
+- A section's key: `Section::KINDS` / `KEYS`, which the tools' descriptions and the note menu read
+- Whose brain: `Subject::KINDS` (client, work), which the routes' constraint reads
+- Whether a note can go to a brain: `Subject.promotable?` (on a client, work, section of work, or a
+  task with a work or client), the one rule for the note menu and `for_note`
