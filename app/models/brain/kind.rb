@@ -17,11 +17,25 @@ module Brain
 
     normalizes :label, with: ->(label) { label.to_s.squish }
     normalizes :hint, with: ->(hint) { hint.to_s.squish.presence }
-    normalizes :work_labels, with: ->(labels) { (Array(labels).map(&:to_s) & Work::LABELS).presence }
+    normalizes :work_labels, with: ->(labels) { (Array(labels).map(&:to_s) & Brain::Kind.work_labels_known).presence }
     before_validation(on: :create) { self.key ||= label.to_s.parameterize(separator: "_").presence }
 
     scope :active, -> { where(archived_at: nil) }
     scope :ordered, -> { order(:position, :id) }
+
+    # The install's work types (core 5.9: Work.labels, the types in Settings > Names), else the
+    # three every core has.
+    def self.work_labels_known = Work.respond_to?(:labels) ? Work.labels : Work::LABELS
+
+    # The types to pick from, in the install's order, with their names: those switched on, plus
+    # any this section already names.
+    def self.work_label_options(selected = [])
+      if defined?(WorkType)
+        WorkType.cached.select { !it.archived? || Array(selected).include?(it.key) }.map { [ it.name_one, it.key ] }
+      else
+        Work::LABELS.map { [ Setting.current.label_name(it), it ] }
+      end
+    end
 
     def self.keys = active.ordered.pluck(:key)
     def self.find_key(key) = active.find_by(key: key.to_s)

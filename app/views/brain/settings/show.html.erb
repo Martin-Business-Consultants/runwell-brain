@@ -25,7 +25,7 @@
             </div>
             <div class="brain-kinds__choices">
               <%= form.select :applies_to, Brain::Kind::APPLIES.map { |value, text| [ text, value ] }, {}, class: "select--sm", aria: { label: "Who has it" }, data: { action: "change->form#submit" } %>
-              <%= form.select :work_labels, Work::LABELS.map { [ label_term(it), it ] }, { include_blank: "All kinds of #{term(:work).downcase}", selected: kind.work_labels }, multiple: true,
+              <%= form.select :work_labels, Brain::Kind.work_label_options(kind.work_labels), { include_blank: "All kinds of #{term(:work).downcase}", selected: kind.work_labels }, multiple: true,
                     class: "select--sm", aria: { label: "Which kinds of #{term(:work).downcase}" }, data: { action: "change->form#submit" } %>
               <%= switch_field form, :always_in_brief, label: "Always in AI briefs", submit_on_change: true %>
             </div>
