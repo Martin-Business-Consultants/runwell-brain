@@ -1,15 +1,41 @@
 <%# locals: (subject:) %>
-<%# A client's or a piece of work's brain: what everyone should know about it, a card per section,
-    each written in place and confirmed when it still holds. Its first heading is hidden: the tab
-    names it. %>
-<% sections = Brain::Section.for(subject) %>
+<%# A client's or a piece of work's brain: who keeps it, its sections (the install's, Brain::Kind,
+    each written in place, confirmed when it still holds, with its versions), the decisions log, and
+    the questions asked that it doesn't answer yet. Its first heading is hidden: the tab names it. %>
+<% kinds = Brain::Kind.for(subject) %>
+<% sections = Brain::Section.for(subject, kinds: kinds) %>
+<% keeper = Brain::Keeping.keeper_for(subject) %>
+<% kind = Brain::Subject.kind(subject) %>
+<% param = Brain::Subject.param(subject) %>
+<% questions = Brain::Question.open.where(subject: subject).newest_first.includes(:task).to_a %>
+<% revisions = Brain::Section.revisions_of(sections) %>
 <section class="brain">
   <h2 class="brain__heading">Brain</h2>
-  <p class="brain__intro muted">
-    What everyone should know about <%= Brain::Subject.name(subject) %>, so it isn’t only in one person’s head. Keep each part short and true;
-    it goes into every <%= term(:task).downcase %>’s brief for AI. Notes that matter long-term can be added from their menu.
-  </p>
-  <div class="brain__sections">
-    <%= render partial: "brain/sections/section", collection: sections, as: :section, locals: { subject: subject } %>
+  <div class="brain__top">
+    <p class="brain__intro muted">
+      What everyone should know about <%= Brain::Subject.name(subject) %>, so it isn’t only in one person’s head. Keep each part short and true;
+      the parts that bear on a <%= term(:task).downcase %> go into its brief for AI. Notes that matter long-term can be added from their menu.
+    </p>
+    <%= form_with url: brain_keeper_path(subject: kind, id: param), method: :patch, class: "brain__keeper", data: { controller: "form" } do |form| %>
+      <label class="field">
+        <span class="field__label">Kept by</span>
+        <%= form.select :keeper_id, User.people.active.ordered.map { [ it.display_name, it.id ] }, { include_blank: "Nobody", selected: keeper&.id },
+              class: "select--sm", aria: { label: "Who keeps this brain" }, data: { action: "change->form#submit" } %>
+      </label>
+      <p class="field__hint">They get a <%= term(:task).downcase %> to review any part that goes stale, and the questions asked about it.</p>
+    <% end %>
   </div>
+
+  <div class="brain__sections">
+    <% sections.each do |section| %>
+      <%# herb:key section.key %>
+      <% if section.decisions? %>
+        <%= render "brain/decisions/log", subject: subject, section: section %>
+      <% else %>
+        <%= render "brain/sections/section", section: section, subject: subject, revisions: revisions.fetch(section.id, []) %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%= render "brain/questions/list", subject: subject, questions: questions, kinds: kinds %>
 </section>

@@ -12,3 +12,41 @@
 .brain-section__footer { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
 .brain-promote { display: inline-block; }
 .brain-promote__form { display: flex; align-items: center; gap: var(--s-2); padding-top: var(--s-2); }
+
+/* Who keeps a brain, beside its intro. */
+.brain__top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--s-4); }
+.brain__keeper { flex: 0 1 20rem; gap: var(--s-1); }
+
+/* A section's versions: who, when, what changed (added and removed paragraphs), Restore. */
+.brain-history { padding: 0 var(--s-4) var(--s-3); }
+.brain-history__summary { display: inline-flex; align-items: center; gap: var(--s-1); color: var(--text-muted); font-size: var(--text-meta); cursor: pointer; }
+.brain-history__list { display: flex; flex-direction: column; gap: var(--s-3); margin: var(--s-2) 0 0; padding: 0; list-style: none; }
+.brain-history__version { display: flex; flex-direction: column; gap: var(--s-1); padding-left: var(--s-3); border-left: 2px solid var(--line); }
+.brain-history__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: 0; }
+.brain-history__restore { display: inline-flex; margin-left: auto; }
+.brain-history__changes { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; font-size: var(--text-meta); }
+.brain-history__line { overflow-wrap: anywhere; }
+.brain-history__line--added { color: var(--ok); }
+.brain-history__line--removed { color: var(--danger); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+
+/* The decisions log. */
+.brain-decisions__earlier { padding-bottom: var(--s-2); border-bottom: 1px solid var(--line); }
+.brain-decisions__list { display: flex; flex-direction: column; gap: var(--s-3); width: 100%; margin: 0; padding: 0; list-style: none; }
+.brain-decisions__item { position: relative; display: flex; flex-direction: column; gap: 2px; padding-left: var(--s-3); border-left: 2px solid var(--accent); }
+.brain-decisions__meta { margin: 0; }
+.brain-decisions__why { color: var(--text-muted); }
+
+/* Questions it doesn't answer yet; answering one on its task. */
+.brain-questions__list { display: flex; flex-direction: column; gap: var(--s-2); width: 100%; margin: 0; padding: 0; list-style: none; }
+.brain-questions__item { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.brain-answer__question { margin: 0; font-weight: var(--weight-strong); }
+.brain-notice { display: flex; align-items: flex-start; gap: var(--s-2); margin: 0; padding: var(--s-2) var(--s-3); border-radius: calc(.5rem * var(--radius-scale, 1)); background: var(--brand-tint); font-size: var(--text-meta); }
+
+/* Settings › Brain: the sections kept. */
+.brain-kinds__row { align-items: flex-start; }
+.brain-kinds__row--archived { opacity: .55; }
+.brain-kinds__form { flex: 1; flex-direction: row; flex-wrap: wrap; gap: var(--s-3); }
+.brain-kinds__names { display: flex; flex: 1 1 18rem; flex-direction: column; gap: var(--s-1); }
+.brain-kinds__choices { display: flex; flex: 1 1 16rem; flex-direction: column; gap: var(--s-2); }
+.brain-kinds__down .icon { transform: rotate(180deg); }
+.brain-kinds__new { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--s-2); }

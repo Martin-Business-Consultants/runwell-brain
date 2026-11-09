@@ -4,15 +4,15 @@ module Brain
   class PromotionsController < ApplicationController
     allow_staff
     agent_tool :add_note_to_brain, on: :create, title: "Add a note to a brain",
-      description: "note_id: the note; key: the section it belongs in (#{Brain::Section::KEYS.to_sentence(last_word_connector: " or ")}). It's added at the end of that section of its client's or its work's brain, credited to who wrote it.",
-      params: { key: Brain::Section::KEYS }
+      description: "note_id: the note; key: the section it belongs in, from show_brain (about, people, working… as this install names them). It's added at the end of that section of its client's or its work's brain, credited to who wrote it.",
+      params: { key: "string" }
 
     def create
       note = Note.find(params[:note_id])
       subject = Brain::Subject.for_note(note)
       return redirect_back(fallback_location: main_app.root_path, alert: "That note isn’t on a #{helpers.term(:client).downcase} or a #{helpers.term(:work).downcase}.") unless subject
 
-      section = Brain::Section.find_or_initialize_by(subject: subject, key: params[:key].presence_in(Brain::Section::KEYS) || "about")
+      section = Brain::Section.find_or_initialize_by(subject: subject, key: Brain::Kind.find_key(params[:key])&.key || Brain::Kind.for(subject).first&.key)
       section.append!(note, by: Current.user)
       redirect_back fallback_location: main_app.polymorphic_path(subject), notice: "Added to #{section.label} in #{Brain::Subject.name(subject)}’s brain."
     end

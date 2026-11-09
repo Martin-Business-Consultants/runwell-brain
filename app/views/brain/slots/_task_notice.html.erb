@@ -1,0 +1,10 @@
+<%# locals: (task:) %>
+<%# Under a task's title (its page and the side panel): when it's a question for a brain, where to
+    answer it, so the answer reaches the brain rather than only the task. %>
+<% question = task.brain_questions.open.first %>
+<% if question %>
+  <p class="brain-notice" role="note">
+    <%= icon_tag "info" %>
+    <span>A question for <%= Brain::Subject.name(question.subject) %>’s brain. <%= link_to "Answer it into the brain", main_app.task_path(task, anchor: "brain-answer"), data: { turbo_frame: "_top" } %>; that marks this done.</span>
+  </p>
+<% end %>

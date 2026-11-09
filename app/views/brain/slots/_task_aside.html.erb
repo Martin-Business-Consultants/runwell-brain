@@ -1,0 +1,24 @@
+<%# locals: (task:) %>
+<%# On a task that's a question for a brain (Brain::Question): the question, and the answer written
+    straight into the brain, which marks the task done. %>
+<% question = task.brain_questions.open.first %>
+<% if question %>
+  <% kinds = Brain::Kind.for(question.subject).reject(&:decisions?) %>
+  <section class="card card--sm brain-answer" id="brain-answer">
+    <header class="card__head">
+      <h2 class="card__title">Answer into the brain</h2>
+      <p class="card__hint"><%= Brain::Subject.name(question.subject) %>’s brain doesn’t say this yet.</p>
+    </header>
+    <div class="card__content stack">
+      <p class="brain-answer__question"><%= question.question %></p>
+      <%= form_with url: brain_question_answer_path(id: question.id), scope: :answer, namespace: "brain_answer_#{question.id}", class: "brain-section__form" do |form| %>
+        <%= rich_text_field form, :answer %>
+        <label class="field">
+          <span class="field__label">Into</span>
+          <%= form.select :key, kinds.map { [ it.label, it.key ] }, { selected: question.key }, aria: { label: "Which part of the brain" } %>
+        </label>
+        <div class="button-row"><button type="submit" class="btn btn--primary btn--sm">Answer</button></div>
+      <% end %>
+    </div>
+  </section>
+<% end %>

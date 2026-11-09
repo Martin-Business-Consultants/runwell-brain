@@ -1,8 +1,10 @@
-<%# locals: (section:, subject:) %>
-<%# One section of a brain: what it holds, who last confirmed it (stale after six months), and
-    Edit (a <details> form; saving confirms it) and Confirm (still true as it stands). %>
+<%# locals: (section:, subject:, revisions: nil) %>
+<%# One section of a brain: what it holds, its state (stale after six months unconfirmed), Edit (a
+    <details> form; saving confirms it, saving it blank clears it), Still true, and its versions
+    (each with what changed from the one before, and Restore). %>
 <% kind = Brain::Subject.kind(subject) %>
 <% param = Brain::Subject.param(subject) %>
+<% revisions ||= [] %>
 <section class="card brain-section" id="brain_<%= section.key %>">
   <header class="card__head">
     <h3 class="card__title"><%= section.label %></h3>
@@ -28,18 +30,47 @@
       <% end %>
     </details>
   </div>
-  <% if section.confirmable? %>
+  <% if section.confirmable? || revisions.size > 1 %>
     <footer class="card__footer brain-section__footer">
       <span class="muted small">
         <% if section.confirmed_at %>
           Confirmed <%= time_ago_in_words(section.confirmed_at) %> ago<% if section.confirmed_by %> by <%= section.confirmed_by.display_name %><% end %>
-        <% else %>
+        <% elsif section.written? %>
           Never confirmed
         <% end %>
       </span>
-      <%= button_to brain_section_confirmation_path(subject: kind, id: param, key: section.key), class: "btn btn--ghost btn--sm", title: "Still true as it stands" do %>
-        <%= icon_tag "check" %> <span>Still true</span>
+      <% if section.confirmable? %>
+        <%= button_to brain_section_confirmation_path(subject: kind, id: param, key: section.key), class: "btn btn--ghost btn--sm", title: "Still true as it stands" do %>
+          <%= icon_tag "check" %> <span>Still true</span>
+        <% end %>
       <% end %>
     </footer>
+  <% end %>
+  <% if revisions.size > 1 %>
+    <details class="brain-history">
+      <summary class="brain-history__summary"><%= icon_tag "history" %> <%= pluralize(revisions.size, "version") %></summary>
+      <ol class="brain-history__list">
+        <% revisions.each_with_index do |revision, index| %>
+          <%# herb:key revision.id %>
+          <li class="brain-history__version">
+            <p class="brain-history__meta small">
+              <strong><%= revision.written_by&.display_name || "Someone" %></strong>
+              <span class="muted"><%= time_ago_in_words(revision.created_at) %> ago<%= " · #{revision.via}" if revision.via.present? && revision.via != "app" %></span>
+              <% if index.positive? %>
+                <%= button_to "Restore", brain_section_restore_path(subject: kind, id: param, key: section.key, revision_id: revision.id), class: "btn btn--ghost btn--sm", form_class: "brain-history__restore" %>
+              <% else %>
+                <span class="badge">Now</span>
+              <% end %>
+            </p>
+            <ul class="brain-history__changes">
+              <% revision.what_changed(revisions[index + 1]).reject { |change, _| change == :same }.first(8).each_with_index do |(change, line), line_index| %>
+                <%# herb:key line_index %>
+                <li class="<%= class_names("brain-history__line", "brain-history__line--#{change}") %>"><%= change == :added ? "+" : "−" %> <%= line.truncate(160) %></li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+      </ol>
+    </details>
   <% end %>
 </section>

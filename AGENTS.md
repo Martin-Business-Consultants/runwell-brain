@@ -38,7 +38,18 @@ keep a copy (Runwell's own convention):
   (`Section#state`, `STATES` for the words; agents see `state` and `confirmable`). Writing confirms
   it; writing it blank clears it back to empty; only a written section can be confirmed
   (`confirmable?`; `confirm!` raises `Section::Refused`, and the controller refuses with the reason)
-- A section's key: `Section::KINDS` / `KEYS`, which the tools' descriptions and the note menu read
+- A section's kind: `Brain::Kind` (the install's: key fixed, name, order, who has it, always in
+  briefs, archived); `Kind.for(subject)` is the one rule for which sections a brain has
+- Versions: every `Section#write!` keeps a `Brain::Revision` and records `brain.*` on the subject
+  (through the core's `record_event!`); restore writes an old one back as new
+- Keeping: `Brain::Keeping` (who keeps a brain); `Brain::Review` turns a stale section into a task
+  for them, once, and writing or confirming it closes the task (`Section#close_review!`)
+- Questions: open until answered (`Brain::Question`), each with its task; answering writes the
+  section and marks the task done
+- The brief: `Brain::Brief` picks what bears on the task within `BUDGET`; keep it the only place
+  that decides what an AI is given
 - Whose brain: `Subject::KINDS` (client, work), which the routes' constraint reads
 - Whether a note can go to a brain: `Subject.promotable?` (on a client, work, section of work, or a
   task with a work or client), the one rule for the note menu and `for_note`
+- What a request shares across rows goes in `Brain::PerRequest`, never a class named `Current`
+  (it would hide the core's `Current` inside `Brain`)

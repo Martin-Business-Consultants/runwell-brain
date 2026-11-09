@@ -6,7 +6,7 @@
   <details class="brain-promote">
     <summary class="btn btn--ghost btn--sm"><%= icon_tag "add" %> Add to brain</summary>
     <%= form_with url: brain_note_promotion_path(note_id: note.id), method: :post, namespace: "brain_note_#{note.id}", class: "brain-promote__form" do |form| %>
-      <%= form.select :key, Brain::Section::KINDS.map { |key, (label, _)| [ label, key ] }, {}, aria: { label: "Which part of the brain" } %>
+      <%= form.select :key, Brain::PerRequest.note_kind_options, {}, aria: { label: "Which part of the brain" } %>
       <button type="submit" class="btn btn--primary btn--sm">Add</button>
     <% end %>
   </details>

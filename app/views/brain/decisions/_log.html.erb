@@ -1,0 +1,63 @@
+<%# locals: (subject:, section:) %>
+<%# The decisions log (Brain::Decision): newest first, each with when, who decided, what and why, and
+    the task it came from; a decision added from a <details> form. Anything written in the section
+    before the log existed stays above it. %>
+<% kind = Brain::Subject.kind(subject) %>
+<% param = Brain::Subject.param(subject) %>
+<% decisions = Brain::Decision.where(subject: subject).newest_first.includes(:task).to_a %>
+<section class="card brain-section brain-decisions" id="brain_<%= section.key %>">
+  <header class="card__head">
+    <h3 class="card__title"><%= section.label %> <span class="count"><%= decisions.size %></span></h3>
+    <p class="card__hint"><%= section.hint %></p>
+  </header>
+  <div class="card__content brain-section__body">
+    <% if section.written? %>
+      <div class="brain-section__text brain-decisions__earlier"><%= rich_text section.body %></div>
+    <% end %>
+    <% if decisions.any? %>
+      <ol class="brain-decisions__list">
+        <% decisions.each do |decision| %>
+          <%# herb:key decision.id %>
+          <li class="brain-decisions__item">
+            <p class="brain-decisions__meta small muted">
+              <time datetime="<%= decision.decided_on.iso8601 %>"><%= l(decision.decided_on, format: :long) %></time>
+              <% if decision.decided_by %> · <%= decision.decided_by %><% end %>
+              <% if decision.task %> · <%= link_to decision.task.title, main_app.task_path(decision.task) %><% end %>
+            </p>
+            <div class="brain-decisions__what"><%= rich_text decision.decision %></div>
+            <% if decision.why_plain.present? %>
+              <div class="brain-decisions__why small"><strong>Why:</strong> <%= rich_text decision.why %></div>
+            <% end %>
+            <%= render "layouts/shared/delete_dialog", name: "this decision", path: brain_decision_path(decision), message: "Only for one logged by mistake: it stays in the history." %>
+          </li>
+        <% end %>
+      </ol>
+    <% elsif !section.written? %>
+      <p class="muted">No decisions logged yet.</p>
+    <% end %>
+    <details class="brain-section__edit">
+      <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Log a decision</summary>
+      <%= form_with url: brain_decisions_path(subject: kind, id: param), scope: :decision, namespace: "brain_decision_#{kind}_#{param}", class: "brain-section__form" do |form| %>
+        <label class="field">
+          <span class="field__label">What was decided</span>
+          <%= rich_text_field form, :decision %>
+        </label>
+        <label class="field">
+          <span class="field__label">Why</span>
+          <%= rich_text_field form, :why %>
+        </label>
+        <div class="field-row">
+          <label class="field">
+            <span class="field__label">Who decided</span>
+            <%= form.text_field :decided_by, maxlength: 120, autocomplete: "off", placeholder: "Dana at Harbor, or a teammate" %>
+          </label>
+          <label class="field">
+            <span class="field__label">When</span>
+            <%= date_input form, :decided_on %>
+          </label>
+        </div>
+        <div class="button-row"><button type="submit" class="btn btn--primary btn--sm">Log it</button></div>
+      <% end %>
+    </details>
+  </div>
+</section>

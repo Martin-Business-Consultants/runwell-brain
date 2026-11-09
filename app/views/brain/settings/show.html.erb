@@ -1,0 +1,56 @@
+<% @page_title = "Brain" %>
+<%= render "settings/header", current: :brain %>
+<%# The sections brains keep (Brain::SettingsController): each one's name and hint, who has it
+    (clients, work or both, and which work types), whether it always goes into AI briefs, its order
+    (↑ ↓) and archiving; then a new one. Each row saves as it changes. %>
+<div class="settings-page">
+  <section class="settings-section">
+    <header class="settings-section__head">
+      <h2>Sections</h2>
+      <p class="settings-section__description">
+        What every brain keeps, in this order. Name them in your own words, give clients and work (or one kind of work) their own,
+        and say which always go into a <%= term(:task).downcase %>’s brief for AI; the rest go in only when they bear on it.
+        Archiving one hides it from brains and keeps what’s written in it.
+      </p>
+    </header>
+    <ul class="settings-list brain-kinds">
+      <% @kinds.each_with_index do |kind, index| %>
+        <%# herb:key kind.id %>
+        <li class="<%= class_names("list-row", "brain-kinds__row", "brain-kinds__row--archived": kind.archived?) %>">
+          <%= form_with model: kind, url: brain_kind_path(kind), method: :patch, scope: :kind, namespace: "brain_kind_#{kind.id}", class: "brain-kinds__form", data: { controller: "form" } do |form| %>
+            <div class="brain-kinds__names">
+              <%= form.text_field :label, maxlength: 60, aria: { label: "Name" }, data: { action: "change->form#submit" } %>
+              <%= form.text_field :hint, maxlength: 200, placeholder: "What goes in it", aria: { label: "Hint" }, data: { action: "change->form#submit" } %>
+              <span class="muted small">Key: <code><%= kind.key %></code><%= " · the decisions log" if kind.decisions? %></span>
+            </div>
+            <div class="brain-kinds__choices">
+              <%= form.select :applies_to, Brain::Kind::APPLIES.map { |value, text| [ text, value ] }, {}, class: "select--sm", aria: { label: "Who has it" }, data: { action: "change->form#submit" } %>
+              <%= form.select :work_labels, Work::LABELS.map { [ label_term(it), it ] }, { include_blank: "All kinds of #{term(:work).downcase}", selected: kind.work_labels }, multiple: true,
+                    class: "select--sm", aria: { label: "Which kinds of #{term(:work).downcase}" }, data: { action: "change->form#submit" } %>
+              <%= switch_field form, :always_in_brief, label: "Always in AI briefs", submit_on_change: true %>
+            </div>
+          <% end %>
+          <div class="list-row__actions">
+            <%= button_to brain_kind_path(kind), method: :patch, params: { move: "up" }, class: "icon-button", title: "Move up", disabled: index.zero? do %>
+              <%= icon_tag "arrow-up" %><span class="visually-hidden">Move <%= kind.label %> up</span>
+            <% end %>
+            <%= button_to brain_kind_path(kind), method: :patch, params: { move: "down" }, class: "icon-button brain-kinds__down", title: "Move down", disabled: index == @kinds.size - 1 do %>
+              <%= icon_tag "arrow-up" %><span class="visually-hidden">Move <%= kind.label %> down</span>
+            <% end %>
+            <%= button_to (kind.archived? ? "Bring back" : "Archive"), brain_kind_path(kind), method: :patch, params: { kind: { archived: !kind.archived? } }, class: "btn btn--ghost btn--sm" %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <section class="settings-section">
+    <header class="settings-section__head"><h3>Add a section</h3></header>
+    <%= form_with url: brain_kinds_path, scope: :kind, namespace: "brain_new_kind", class: "brain-kinds__new" do |form| %>
+      <%= form.text_field :label, required: true, maxlength: 60, placeholder: "Name (Their brand, Access and logins…)", aria: { label: "Name" } %>
+      <%= form.text_field :hint, maxlength: 200, placeholder: "What goes in it", aria: { label: "Hint" } %>
+      <%= form.select :applies_to, Brain::Kind::APPLIES.map { |value, text| [ text, value ] }, {}, class: "select--sm", aria: { label: "Who has it" } %>
+      <button type="submit" class="btn btn--secondary btn--sm"><%= icon_tag "add" %> <span>Add</span></button>
+    <% end %>
+  </section>
+</div>
