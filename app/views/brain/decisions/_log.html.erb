@@ -5,12 +5,11 @@
 <% kind = Brain::Subject.kind(subject) %>
 <% param = Brain::Subject.param(subject) %>
 <% decisions = Brain::Decision.where(subject: subject).newest_first.includes(:task).to_a %>
-<section class="card brain-section brain-decisions" id="brain_<%= section.key %>">
-  <header class="card__head">
-    <h3 class="card__title"><%= section.label %> <span class="count"><%= decisions.size %></span></h3>
-    <p class="card__hint"><%= section.hint %></p>
-  </header>
-  <div class="card__content brain-section__body">
+<% title = capture do %>
+  <h3 class="brain-card__title"><%= section.label %> <%= ui :badge, variant: :secondary, content: decisions.size %></h3>
+<% end %>
+<%= ui :card, id: "brain_#{section.key}", class: "brain-section brain-decisions", title: title, description: section.hint do %>
+  <div class="brain-section__body">
     <% if section.written? %>
       <div class="brain-section__text brain-decisions__earlier"><%= rich_text section.body %></div>
     <% end %>
@@ -19,45 +18,43 @@
         <% decisions.each do |decision| %>
           <%# herb:key decision.id %>
           <li class="brain-decisions__item">
-            <p class="brain-decisions__meta small muted">
-              <time datetime="<%= decision.decided_on.iso8601 %>"><%= l(decision.decided_on, format: :long) %></time>
-              <% if decision.decided_by %> · <%= decision.decided_by %><% end %>
-              <% if decision.task %> · <%= link_to decision.task.title, main_app.task_path(decision.task) %><% end %>
-            </p>
+            <div class="brain-decisions__head">
+              <p class="brain-decisions__meta">
+                <time datetime="<%= decision.decided_on.iso8601 %>"><%= l(decision.decided_on, format: :long) %></time>
+                <% if decision.decided_by %> · <%= decision.decided_by %><% end %>
+                <% if decision.task %> · <%= link_to decision.task.title, main_app.task_path(decision.task) %><% end %>
+              </p>
+              <%= render "layouts/shared/delete_dialog", name: "this decision", path: brain_decision_path(decision), message: "Only for one logged by mistake: it stays in the history." %>
+            </div>
             <div class="brain-decisions__what"><%= rich_text decision.decision %></div>
             <% if decision.why_plain.present? %>
-              <div class="brain-decisions__why small"><strong>Why:</strong> <%= rich_text decision.why %></div>
+              <div class="brain-decisions__why"><strong>Why:</strong> <%= rich_text decision.why %></div>
             <% end %>
-            <%= render "layouts/shared/delete_dialog", name: "this decision", path: brain_decision_path(decision), message: "Only for one logged by mistake: it stays in the history." %>
           </li>
         <% end %>
       </ol>
     <% elsif !section.written? %>
-      <p class="muted">No decisions logged yet.</p>
+      <p class="brain-section__empty">No decisions logged yet.</p>
     <% end %>
     <details class="brain-section__edit">
-      <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Log a decision</summary>
+      <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Log a decision</summary>
       <%= form_with url: brain_decisions_path(subject: kind, id: param), scope: :decision, namespace: "brain_decision_#{kind}_#{param}", class: "brain-section__form" do |form| %>
-        <label class="field">
-          <span class="field__label">What was decided</span>
+        <%= ui :field, label: "What was decided" do %>
           <%= rich_text_field form, :decision %>
-        </label>
-        <label class="field">
-          <span class="field__label">Why</span>
+        <% end %>
+        <%= ui :field, label: "Why" do %>
           <%= rich_text_field form, :why %>
-        </label>
-        <div class="field-row">
-          <label class="field">
-            <span class="field__label">Who decided</span>
+        <% end %>
+        <div class="brain-section__row">
+          <%= ui :field, label: "Who decided" do %>
             <%= form.text_field :decided_by, maxlength: 120, autocomplete: "off", placeholder: "Dana at Harbor, or a teammate" %>
-          </label>
-          <label class="field">
-            <span class="field__label">When</span>
+          <% end %>
+          <%= ui :field, label: "When" do %>
             <%= date_input form, :decided_on %>
-          </label>
+          <% end %>
         </div>
-        <div class="button-row"><button type="submit" class="btn btn--primary btn--sm">Log it</button></div>
+        <div><%= ui :button, type: :submit, size: :sm, content: "Log it" %></div>
       <% end %>
     </details>
   </div>
-</section>
+<% end %>

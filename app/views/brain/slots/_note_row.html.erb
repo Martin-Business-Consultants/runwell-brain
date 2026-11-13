@@ -4,10 +4,10 @@
     the note's own columns, and a task's work or client, already loaded with its notes). %>
 <% if Brain::Subject.promotable?(note) %>
   <details class="brain-promote">
-    <summary class="btn btn--ghost btn--sm"><%= icon_tag "add" %> Add to brain</summary>
+    <summary class="ui-button" data-variant="ghost" data-size="sm"><%= icon_tag "add" %> Add to brain</summary>
     <%= form_with url: brain_note_promotion_path(note_id: note.id), method: :post, namespace: "brain_note_#{note.id}", class: "brain-promote__form" do |form| %>
       <%= form.select :key, Brain::PerRequest.note_kind_options, {}, aria: { label: "Which part of the brain" } %>
-      <button type="submit" class="btn btn--primary btn--sm">Add</button>
+      <%= ui :button, type: :submit, size: :sm, content: "Add" %>
     <% end %>
   </details>
 <% end %>

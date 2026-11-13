@@ -46,7 +46,7 @@ module Brain
 
     config.to_prepare do
       Runwell::Plugins.register :brain, name: "Brain", version: Brain::VERSION, author: "Martin Business Consultants",
-        enabled_by_default: false, requires: ">= 5.6.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-brain",
+        enabled_by_default: false, requires: ">= 6.0.0", homepage: "https://github.com/Martin-Business-Consultants/runwell-brain",
         description: "What everyone should know about each client and piece of work, in one short page kept true: who decides, how they work, what's unique, what was decided. In every task's brief for AI."
       Runwell::Plugins.slot :client_panel, :brain, "brain/slots/client_panel"
       Runwell::Plugins.slot :work_panel, :brain, "brain/slots/work_panel"

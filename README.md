@@ -5,7 +5,7 @@ true, so it isn't only in one person's head. A plugin for
 [Runwell](https://github.com/Martin-Business-Consultants/runwellv2). Why and where it's going:
 [docs/brain.md](docs/brain.md).
 
-## What it does (0.3)
+## What it does (0.4)
 
 - **A Brain tab** on every client and piece of work, with the sections your install keeps
   (Settings › Plugins › Brain: six to start, renamed, reordered, added to or archived; clients, work
@@ -30,6 +30,9 @@ true, so it isn't only in one person's head. A plugin for
   for settings `show_brain_settings`, `add_brain_kind`, `update_brain_kind`.
 
 Staff only: nothing here reaches the client portal.
+
+Needs Runwell 6.0 or later: it's drawn with runeui (`ui :card`, `ui :badge`, `ui :button`,
+`ui :field`) and its stylesheet reads runeui's tokens only (shadcn's names and `--ui-*`).
 
 ## Install
 

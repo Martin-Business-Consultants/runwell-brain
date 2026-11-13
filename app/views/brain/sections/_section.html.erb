@@ -5,47 +5,40 @@
 <% kind = Brain::Subject.kind(subject) %>
 <% param = Brain::Subject.param(subject) %>
 <% revisions ||= [] %>
-<section class="card brain-section" id="brain_<%= section.key %>">
-  <header class="card__head">
-    <h3 class="card__title"><%= section.label %></h3>
-    <p class="card__hint"><%= section.hint %></p>
-    <% if section.stale? %>
-      <div class="card__action"><%= badge section.state_label, tone: :attention %></div>
+<% footer = nil %>
+<% if section.confirmable? || revisions.size > 1 %>
+  <% footer = capture do %>
+    <span class="brain-section__meta">
+      <% if section.confirmed_at %>
+        Confirmed <%= time_ago_in_words(section.confirmed_at) %> ago<% if section.confirmed_by %> by <%= section.confirmed_by.display_name %><% end %>
+      <% elsif section.written? %>
+        Never confirmed
+      <% end %>
+    </span>
+    <% if section.confirmable? %>
+      <%= button_to brain_section_confirmation_path(subject: kind, id: param, key: section.key), class: "ui-button", data: { variant: "ghost", size: "sm" }, title: "Still true as it stands" do %>
+        <%= icon_tag "check" %> <span>Still true</span>
+      <% end %>
     <% end %>
-  </header>
-  <div class="card__content brain-section__body">
+  <% end %>
+<% end %>
+<%= ui :card, id: "brain_#{section.key}", class: "brain-section", title: tag.h3(section.label, class: "brain-card__title"), description: section.hint,
+      action: (ui(:badge, variant: :warning, content: section.state_label) if section.stale?), footer: footer do %>
+  <div class="brain-section__body">
     <% if section.written? %>
       <div class="brain-section__text"><%= rich_text section.body %></div>
     <% else %>
-      <p class="muted"><%= section.state_label %>.</p>
+      <p class="brain-section__empty"><%= section.state_label %>.</p>
     <% end %>
     <details class="brain-section__edit">
-      <summary class="btn btn--secondary btn--sm"><%= icon_tag "pencil" %> <%= section.written? ? "Edit" : "Write it" %></summary>
+      <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "pencil" %> <%= section.written? ? "Edit" : "Write it" %></summary>
       <%= form_with model: section, url: brain_section_path(subject: kind, id: param, key: section.key), method: :patch, scope: :section,
             namespace: "brain_#{kind}_#{param}_#{section.key}", class: "brain-section__form" do |form| %>
         <%= rich_text_field form, :body %>
-        <div class="button-row">
-          <button type="submit" class="btn btn--primary btn--sm">Save</button>
-        </div>
+        <div><%= ui :button, type: :submit, size: :sm, content: "Save" %></div>
       <% end %>
     </details>
   </div>
-  <% if section.confirmable? || revisions.size > 1 %>
-    <footer class="card__footer brain-section__footer">
-      <span class="muted small">
-        <% if section.confirmed_at %>
-          Confirmed <%= time_ago_in_words(section.confirmed_at) %> ago<% if section.confirmed_by %> by <%= section.confirmed_by.display_name %><% end %>
-        <% elsif section.written? %>
-          Never confirmed
-        <% end %>
-      </span>
-      <% if section.confirmable? %>
-        <%= button_to brain_section_confirmation_path(subject: kind, id: param, key: section.key), class: "btn btn--ghost btn--sm", title: "Still true as it stands" do %>
-          <%= icon_tag "check" %> <span>Still true</span>
-        <% end %>
-      <% end %>
-    </footer>
-  <% end %>
   <% if revisions.size > 1 %>
     <details class="brain-history">
       <summary class="brain-history__summary"><%= icon_tag "history" %> <%= pluralize(revisions.size, "version") %></summary>
@@ -53,15 +46,15 @@
         <% revisions.each_with_index do |revision, index| %>
           <%# herb:key revision.id %>
           <li class="brain-history__version">
-            <p class="brain-history__meta small">
+            <div class="brain-history__meta">
               <strong><%= revision.written_by&.display_name || "Someone" %></strong>
-              <span class="muted"><%= time_ago_in_words(revision.created_at) %> ago<%= " · #{revision.via}" if revision.via.present? && revision.via != "app" %></span>
+              <span class="brain-history__when"><%= time_ago_in_words(revision.created_at) %> ago<%= " · #{revision.via}" if revision.via.present? && revision.via != "app" %></span>
               <% if index.positive? %>
-                <%= button_to "Restore", brain_section_restore_path(subject: kind, id: param, key: section.key, revision_id: revision.id), class: "btn btn--ghost btn--sm", form_class: "brain-history__restore" %>
+                <%= button_to "Restore", brain_section_restore_path(subject: kind, id: param, key: section.key, revision_id: revision.id), class: "ui-button", data: { variant: "ghost", size: "xs" }, form_class: "brain-history__restore" %>
               <% else %>
-                <span class="badge">Now</span>
+                <%= ui :badge, variant: :secondary, content: "Now" %>
               <% end %>
-            </p>
+            </div>
             <ul class="brain-history__changes">
               <% revision.what_changed(revisions[index + 1]).reject { |change, _| change == :same }.first(8).each_with_index do |(change, line), line_index| %>
                 <%# herb:key line_index %>
@@ -73,4 +66,4 @@
       </ol>
     </details>
   <% end %>
-</section>
+<% end %>

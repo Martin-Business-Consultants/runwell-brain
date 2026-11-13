@@ -26,7 +26,8 @@ use nothing else of the core's) and `AGENTS.md` (the conventions plugin code fol
 - Nothing reaches the client portal: brains hold candid things.
 - AI never writes a brain unasked: proposals (a later release) wait for a person's yes.
 - Views follow Runwell's ReActionView rules (strict locals, `herb:key` on loops, no inline CSS) and
-  draw with rune_ui and the contract's helpers; CSS reads the design tokens.
+  draw with runeui (`ui :card`, `ui :badge`, `ui :button`, `ui :field`; Runwell 6.0's UI kit) and the contract's helpers;
+  CSS reads runeui's tokens only (shadcn's names, `--ui-*`, and the core's `--brand-tint`), never rune_ui's old names.
 - Migrations are safe on a live install.
 
 ## State machines

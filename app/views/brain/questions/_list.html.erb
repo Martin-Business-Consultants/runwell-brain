@@ -3,12 +3,12 @@
     each a task for its keeper, answered from that task; and a way to ask one. %>
 <% kind = Brain::Subject.kind(subject) %>
 <% param = Brain::Subject.param(subject) %>
-<section class="card brain-questions">
-  <header class="card__head">
-    <h3 class="card__title">Not known yet <span class="count"><%= questions.size %></span></h3>
-    <p class="card__hint">Questions asked (by people or AI) that the brain doesn’t answer. Each is a <%= term(:task).downcase %> for its keeper; the answer goes into the brain.</p>
-  </header>
-  <div class="card__content brain-section__body">
+<% title = capture do %>
+  <h3 class="brain-card__title">Not known yet <%= ui :badge, variant: :secondary, content: questions.size %></h3>
+<% end %>
+<%= ui :card, class: "brain-questions", title: title,
+      description: "Questions asked (by people or AI) that the brain doesn’t answer. Each is a #{term(:task).downcase} for its keeper; the answer goes into the brain." do %>
+  <div class="brain-section__body">
     <% if questions.any? %>
       <ul class="brain-questions__list">
         <% questions.each do |question| %>
@@ -16,25 +16,23 @@
           <li class="brain-questions__item">
             <span><%= question.question %></span>
             <% if question.task %>
-              <%= link_to "Answer", main_app.task_path(question.task), class: "btn btn--ghost btn--sm" %>
+              <%= link_to "Answer", main_app.task_path(question.task), class: "ui-button", data: { variant: "ghost", size: "sm" } %>
             <% end %>
           </li>
         <% end %>
       </ul>
     <% end %>
     <details class="brain-section__edit">
-      <summary class="btn btn--secondary btn--sm"><%= icon_tag "add" %> Ask something</summary>
+      <summary class="ui-button" data-variant="outline" data-size="sm"><%= icon_tag "add" %> Ask something</summary>
       <%= form_with url: brain_questions_path(subject: kind, id: param), scope: :question, namespace: "brain_question_#{kind}_#{param}", class: "brain-section__form" do |form| %>
-        <label class="field">
-          <span class="field__label">What do you need to know?</span>
+        <%= ui :field, label: "What do you need to know?" do %>
           <%= rich_text_field form, :question %>
-        </label>
-        <label class="field">
-          <span class="field__label">Where the answer belongs</span>
+        <% end %>
+        <%= ui :field, label: "Where the answer belongs" do %>
           <%= form.select :key, kinds.reject(&:decisions?).map { [ it.label, it.key ] }, { include_blank: "Any part" }, aria: { label: "Where the answer belongs" } %>
-        </label>
-        <div class="button-row"><button type="submit" class="btn btn--primary btn--sm">Ask</button></div>
+        <% end %>
+        <div><%= ui :button, type: :submit, size: :sm, content: "Ask" %></div>
       <% end %>
     </details>
   </div>
-</section>
+<% end %>
