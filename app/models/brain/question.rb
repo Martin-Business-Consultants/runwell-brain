@@ -22,7 +22,7 @@ module Brain
     def self.ask!(subject, question, key: nil, by: Current.user)
       keeper = Brain::Keeping.keeper_for(subject)
       transaction do
-        task = Task.create!(title: "Brain question: #{question.squish.truncate(90)}", source: Current.source == "agent" ? "agent" : "app", owner: keeper,
+        task = Task.create!(title: "Brain question: #{question.squish.truncate(90)}", source: Current.source == "agent" ? "agent" : "app", owner: keeper, client_visible: false,
           description: "<p>#{ERB::Util.h(question)}</p><p>Answer it on this task's page, and the answer goes into #{ERB::Util.h(Brain::Subject.name(subject))}’s brain.</p>",
           **(subject.is_a?(Work) ? { work: subject } : { client: subject }))
         create!(subject: subject, question: question, key: key.presence, task: task, asked_by: by&.person).tap do
